@@ -6,9 +6,11 @@ import sys
 
 def main():
     from_path = "static/"
-    to_path = "public/"
+    to_path = "docs/"
+    template = "template.html"
+    content = "content/"
     
-    if sys.argv[1]:
+    if len(sys.argv) > 1:
         basepath = sys.argv[1]
     else:
         basepath = "/"
@@ -30,7 +32,7 @@ def main():
     
     recursiveCopy(from_path, to_path)
     
-    generate_pages_recursive("content/", "template.html", "public/", basepath)
+    generate_pages_recursive(content, template, to_path, basepath)
 
 def recursiveCopy(src, dst):
     list_of_elements = os.listdir(src)
@@ -93,7 +95,7 @@ def generate_pages_recursive(dir_path_content, template_path, dest_dir_path, bas
         if os.path.isfile(pathDIR) and pathDIR.endswith(".md"):
             base, _ = os.path.splitext(entry)
             dest = os.path.join(dest_dir_path, f"{base}.html")
-            generate_page(pathDIR, template_path, dest)
+            generate_page(pathDIR, template_path, dest, basepath)
         elif os.path.isdir(pathDIR):
             if not os.path.exists(pathDEST):
                 os.mkdir(pathDEST, 0o755)
