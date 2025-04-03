@@ -2,10 +2,16 @@ from textnode import *
 from md_parser import markdown_to_blocks
 from text_parser import split_nodes_delimiter
 import os, shutil
+import sys
 
 def main():
     from_path = "static/"
     to_path = "public/"
+    
+    if sys.argv[1]:
+        basepath = sys.argv[1]
+    else:
+        basepath = "/"
     
     from_path_exists = os.path.exists(from_path)
     to_path_exists = os.path.exists(to_path)
@@ -24,9 +30,7 @@ def main():
     
     recursiveCopy(from_path, to_path)
     
-    generate_pages_recursive("content/", "template.html", "public/")
-    
-            
+    generate_pages_recursive("content/", "template.html", "public/", basepath)
 
 def recursiveCopy(src, dst):
     list_of_elements = os.listdir(src)
@@ -60,7 +64,7 @@ def extract_title(markdown):
 
 from md_parser import markdown_to_html_node
 
-def generate_page(from_path, template_path, dest_path):
+def generate_page(from_path, template_path, dest_path, basepath):
     print(f"Generating page from {from_path} to {dest_path} using {template_path}")
     content_markdown = ""
     content_template = ""
@@ -72,11 +76,12 @@ def generate_page(from_path, template_path, dest_path):
     title = extract_title(content_markdown)
     html = HTMLString.to_html()
     result = content_template.replace("{{ Title }}", title).replace("{{ Content }}", html)
+    result = result.replace('href="/', f'href="{basepath}').replace('src="/', f'src="{basepath}')
     with open(dest_path, "w") as content:
         content.write(result)    
     return
 
-def generate_pages_recursive(dir_path_content, template_path, dest_dir_path):
+def generate_pages_recursive(dir_path_content, template_path, dest_dir_path, basepath):
     entries = os.listdir(dir_path_content)
     if len(entries) == 0:
         return
@@ -92,12 +97,8 @@ def generate_pages_recursive(dir_path_content, template_path, dest_dir_path):
         elif os.path.isdir(pathDIR):
             if not os.path.exists(pathDEST):
                 os.mkdir(pathDEST, 0o755)
-            print(f"RECURSIVE GENERATE FOR:\nPATH DIR: {pathDIR}\nTEMPLATE_PATH: {template_path}\nPATH DEST: {pathDEST}")
-            generate_pages_recursive(pathDIR, template_path, pathDEST)
+            generate_pages_recursive(pathDIR, template_path, pathDEST, basepath)
         else:
             continue
-            
-    
-
 
 main()
